@@ -1,8 +1,6 @@
 import java.util.ArrayList;
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.Scanner;
-import java.util.stream.Stream;
 
 public class Main {
 
@@ -41,18 +39,18 @@ public class Main {
 				break;
 
 			case 2: // criar conta corrente
-				criarConta(scanner, clientes, banco.getContas(),
+				Conta.criarConta(scanner, clientes, banco.getContas(),
 						clienteCorrente -> new ContaCorrente(clienteCorrente));
 				break;
 
 			case 3: // criar conta poupanca
-				criarConta(scanner, clientes, banco.getContas(),
+				Conta.criarConta(scanner, clientes, banco.getContas(),
 						clientePoupanca -> new ContaPoupanca(clientePoupanca));
 				break;
 
 			case 4: // depositar
 				// depositar(scanner, contas);
-				operacao(scanner, banco.getContas(), conta -> {
+				Conta.operacao(scanner, banco.getContas(), conta -> {
 					System.out.println("Digite o valor do deposito");
 					Float valor = scanner.nextFloat();
 					if (valor > 0) {
@@ -64,7 +62,7 @@ public class Main {
 				break;
 
 			case 5: // sacar
-				operacao(scanner, banco.getContas(), (conta) -> {
+				Conta.operacao(scanner, banco.getContas(), (conta) -> {
 					System.out.println("Digite o valor do saque");
 					Float valor = scanner.nextFloat();
 					if (valor > 0) {
@@ -76,10 +74,10 @@ public class Main {
 				break;
 
 			case 6: // transferir
-				operacao(scanner, banco.getContas(), contaBase -> {
+				Conta.operacao(scanner, banco.getContas(), contaBase -> {
 					System.out.println("Digite o numero da conta destino");
 					Integer numeroContaDestino = scanner.nextInt();
-					Conta contaDestino = buscarConta(numeroContaDestino,
+					Conta contaDestino = Conta.buscarConta(numeroContaDestino,
 							banco.getContas());
 					if (contaDestino != null) {
 						System.out.println("Digite o valor da transferencia");
@@ -101,64 +99,6 @@ public class Main {
 
 		}
 		scanner.close();
-	}
-
-	static Cliente buscarCliente(String nome, List<Cliente> clientes) {
-		Stream<Cliente> clientesStream = clientes.stream();
-		try {
-			Cliente buscado = clientesStream
-					.filter(c -> c.getNome().equals(nome)).findFirst()
-					.orElseThrow();
-			return buscado;
-		} catch (NoSuchElementException | NullPointerException e) {
-			System.out.println("Cliente não encontrado");
-			return null;
-		}
-	}
-
-	static Conta buscarConta(Integer numeroConta, List<Conta> contas) {
-		Stream<Conta> contasStream = contas.stream();
-		try {
-			Conta buscada = contasStream
-					.filter(c -> c.getNumero() == numeroConta).findFirst()
-					.orElseThrow();
-			return buscada;
-		} catch (NoSuchElementException | NullPointerException e) {
-			System.out.println("Conta não encontrada");
-			return null;
-		}
-	}
-
-	@FunctionalInterface
-	interface AccountCreator {
-		Conta createAccount(Cliente cliente);
-	}
-
-	@FunctionalInterface
-	interface AccountOperation {
-		void execute(Conta conta);
-	}
-
-	static void criarConta(Scanner scanner, List<Cliente> clientes,
-			List<Conta> contas, AccountCreator creator) {
-		System.out.println("Digite o nome do cliente a quem a conta pertence");
-		String nome = scanner.next();
-		Cliente clienteBuscado = buscarCliente(nome, clientes);
-		if (clienteBuscado != null) {
-			Conta conta = creator.createAccount(clienteBuscado);
-			conta.imprimirExtrato();
-			contas.add(conta);
-		}
-	}
-
-	static void operacao(Scanner scanner, List<Conta> contas,
-			AccountOperation operation) {
-		System.out.println("Digite o numero da conta base para a operação");
-		Integer numeroConta = scanner.nextInt();
-		Conta contaBuscada = buscarConta(numeroConta, contas);
-		if (contaBuscada != null) {
-			operation.execute(contaBuscada);
-		}
 	}
 
 }
